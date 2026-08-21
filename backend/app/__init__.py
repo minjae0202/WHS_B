@@ -16,25 +16,67 @@ def create_app():
         "DATABASE_URL", "sqlite:///dev.db"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    app.config["SECRET_KEY"] = os.environ.get(
+        "SECRET_KEY", "change-me-in-env"
+    )
+
+    app.config["SOCIAL_SIGNUP_TOKEN_SECRET"] = os.environ.get(
+        "SOCIAL_SIGNUP_TOKEN_SECRET", "change-me-in-env"
+    )
+
     app.config["JWT_SECRET_KEY"] = os.environ.get(
         "JWT_SECRET_KEY", "change-me-in-env"
     )
+
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
+
+    app.config["GOOGLE_CLIENT_ID"] = os.environ.get(
+        "GOOGLE_CLIENT_ID"
+    )
+
+    app.config["GOOGLE_CLIENT_SECRET"] = os.environ.get(
+        "GOOGLE_CLIENT_SECRET"
+    )
+
+    app.config["GOOGLE_REDIRECT_URI"] = os.environ.get(
+        "GOOGLE_REDIRECT_URI"
+    )
+
+    app.config["KAKAO_REST_API_KEY"] = os.environ.get(
+        "KAKAO_REST_API_KEY"
+    )
+
+    app.config["KAKAO_CLIENT_SECRET"] = os.environ.get(
+        "KAKAO_CLIENT_SECRET"
+    )
+
+    app.config["KAKAO_REDIRECT_URI"] = os.environ.get(
+        "KAKAO_REDIRECT_URI"
+    )
 
     # --- 확장 초기화 ---
     db.init_app(app)
     jwt.init_app(app)
 
+    from app.utils.jwt_callbacks import register_jwt_callbacks
+    register_jwt_callbacks(jwt)
+
+
     # --- 모델 import (Flask-Migrate가 인식하려면 반드시 필요) ---
     # 각자 담당 모델을 여기에 추가한다.
-    # from app.models.user import User
-    # from app.models.account import Account
+    from app.models.user import User  # noqa
+    from app.models.account import Account  # noqa
+    from app.models.social_account import SocialAccount  # noqa
     from app.models.market import MarketAsset, MarketHolding, MarketTransaction  # noqa
 
     # --- Blueprint 등록 ---
     # 각자 담당 라우트를 여기에 추가한다.
-    # from app.routes.auth import auth_bp
-    # app.register_blueprint(auth_bp)
+    from app.routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
+
+    from app.routes.users import users_bp
+    app.register_blueprint(users_bp)
 
     # from app.routes.accounts import accounts_bp
     # app.register_blueprint(accounts_bp)

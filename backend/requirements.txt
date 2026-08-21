@@ -7,3 +7,4 @@ PyMySQL
 python-dotenv
 APScheduler
 yfinance
+requests
