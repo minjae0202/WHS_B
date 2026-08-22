@@ -6,9 +6,11 @@ from marshmallow import ValidationError
 
 from app.errors.exceptions import BusinessException
 from app.extensions import db, jwt
+from dotenv import load_dotenv
 
 
 def create_app():
+    load_dotenv()
     app = Flask(__name__)
 
     # --- 설정 ---
@@ -69,6 +71,12 @@ def create_app():
     from app.models.account import Account  # noqa
     from app.models.social_account import SocialAccount  # noqa
     from app.models.market import MarketAsset, MarketHolding, MarketTransaction  # noqa
+    from app.models.deposits_savings import (  # noqa
+        Account, Deposit, DepositPreferenceCondition, EarlyTerminationRateRule,
+        FinancialProduct, FinancialProductOption, LedgerEntry, LedgerTransaction,
+        ProductPreferenceCondition, Saving, SavingPayment,
+        SavingPreferenceCondition, User,
+    )
 
     # --- Blueprint 등록 ---
     # 각자 담당 라우트를 여기에 추가한다.
@@ -83,6 +91,13 @@ def create_app():
 
     from app.routes.investments import investments_bp
     app.register_blueprint(investments_bp)
+
+    from app.routes.products import products_bp
+    from app.routes.deposits import deposits_bp
+    from app.routes.savings import savings_bp
+    app.register_blueprint(products_bp)
+    app.register_blueprint(deposits_bp)
+    app.register_blueprint(savings_bp)
 
     # --- 공통 에러 핸들러 (개발 가이드 8번) ---
     @app.errorhandler(BusinessException)
