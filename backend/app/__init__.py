@@ -72,10 +72,10 @@ def create_app():
     from app.models.social_account import SocialAccount  # noqa
     from app.models.market import MarketAsset, MarketHolding, MarketTransaction  # noqa
     from app.models.deposits_savings import (  # noqa
-        Account, Deposit, DepositPreferenceCondition, EarlyTerminationRateRule,
+        Deposit, DepositPreferenceCondition, EarlyTerminationRateRule,
         FinancialProduct, FinancialProductOption, LedgerEntry, LedgerTransaction,
         ProductPreferenceCondition, Saving, SavingPayment,
-        SavingPreferenceCondition, User,
+        SavingPreferenceCondition,
     )
 
     # --- Blueprint 등록 ---
