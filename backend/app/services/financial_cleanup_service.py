@@ -1,20 +1,96 @@
-def delete_user_financial_data(user_id):
-    # TODO:
-    # 팀원들의 실제 금융 관련 Model과 합친 뒤
-    # 아래 데이터를 FK 순서에 맞게 삭제
-    #
-    # - 가상계좌
-    # - 저축 목표
-    # - 예금
-    # - 적금
-    # - 적금 납입 내역
-    # - 주식/ETF 보유 내역
-    # - 주식/ETF 거래 내역
-    # - 금융 거래 관련 데이터
-    #
-    # users
-    # posts
-    # audit_logs
-    # 는 삭제하지 않는다.
+from app.models.account import Account
+from app.models.deposits_savings import (
+    Deposit,
+    DepositPreferenceCondition,
+    Saving,
+    SavingPreferenceCondition,
+    SavingPayment,
+    LedgerTransaction,
+    LedgerEntry,
+)
+from app.models.market import MarketHolding, MarketTransaction
+from app.models.monthly_cash_flow import MonthlyCashFlow
+from app.models.simulation_setting import SimulationSetting
 
-    pass
+
+def delete_user_financial_data(user_id):
+    # 예금에 연결된 우대조건 삭제
+    deposit_ids = [
+        deposit_id
+        for (deposit_id,) in Deposit.query.with_entities(
+            Deposit.deposit_id
+        ).filter_by(user_id=user_id).all()
+    ]
+
+    if deposit_ids:
+        DepositPreferenceCondition.query.filter(
+            DepositPreferenceCondition.deposit_id.in_(deposit_ids)
+        ).delete(synchronize_session=False)
+
+    # 적금에 연결된 우대조건 / 납입내역 삭제
+    saving_ids = [
+        saving_id
+        for (saving_id,) in Saving.query.with_entities(
+            Saving.saving_id
+        ).filter_by(user_id=user_id).all()
+    ]
+
+    if saving_ids:
+        SavingPreferenceCondition.query.filter(
+            SavingPreferenceCondition.saving_id.in_(saving_ids)
+        ).delete(synchronize_session=False)
+
+        SavingPayment.query.filter(
+            SavingPayment.saving_id.in_(saving_ids)
+        ).delete(synchronize_session=False)
+
+    # 예금 / 적금 삭제
+    Deposit.query.filter_by(
+        user_id=user_id
+    ).delete(synchronize_session=False)
+
+    Saving.query.filter_by(
+        user_id=user_id
+    ).delete(synchronize_session=False)
+
+    # 주식 / ETF 보유 및 거래내역 삭제
+    MarketHolding.query.filter_by(
+        user_id=user_id
+    ).delete(synchronize_session=False)
+
+    MarketTransaction.query.filter_by(
+        user_id=user_id
+    ).delete(synchronize_session=False)
+
+    # 금융 원장 상세내역 삭제
+    ledger_transaction_ids = [
+        ledger_transaction_id
+        for (ledger_transaction_id,) in LedgerTransaction.query.with_entities(
+            LedgerTransaction.ledger_transaction_id
+        ).filter_by(user_id=user_id).all()
+    ]
+
+    if ledger_transaction_ids:
+        LedgerEntry.query.filter(
+            LedgerEntry.ledger_transaction_id.in_(ledger_transaction_ids)
+        ).delete(synchronize_session=False)
+
+    # 금융 원장 거래내역 삭제
+    LedgerTransaction.query.filter_by(
+        user_id=user_id
+    ).delete(synchronize_session=False)
+
+    # 월별 현금흐름 삭제
+    MonthlyCashFlow.query.filter_by(
+        user_id=user_id
+    ).delete(synchronize_session=False)
+
+    # 시뮬레이션 설정 삭제
+    SimulationSetting.query.filter_by(
+        user_id=user_id
+    ).delete(synchronize_session=False)
+
+    # 가상계좌 삭제
+    Account.query.filter_by(
+        user_id=user_id
+    ).delete(synchronize_session=False)
