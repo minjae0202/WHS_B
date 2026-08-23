@@ -5,7 +5,7 @@ from flask import Flask, jsonify
 from marshmallow import ValidationError
 
 from app.errors.exceptions import BusinessException
-from app.extensions import db, jwt
+from app.extensions import db, jwt, migrate
 from dotenv import load_dotenv
 
 
@@ -60,7 +60,7 @@ def create_app():
     # --- 확장 초기화 ---
     db.init_app(app)
     jwt.init_app(app)
-
+    migrate.init_app(app, db)
     from app.utils.jwt_callbacks import register_jwt_callbacks
     register_jwt_callbacks(jwt)
 
@@ -98,6 +98,15 @@ def create_app():
     app.register_blueprint(products_bp)
     app.register_blueprint(deposits_bp)
     app.register_blueprint(savings_bp)
+
+    from app.routes.simulation import simulation_bp
+    app.register_blueprint(simulation_bp)
+
+    from app.routes.monthly_income import monthly_income_bp
+    app.register_blueprint(monthly_income_bp)
+
+    from app.routes.account import account_bp
+    app.register_blueprint(account_bp)
 
     # --- 공통 에러 핸들러 (개발 가이드 8번) ---
     @app.errorhandler(BusinessException)
