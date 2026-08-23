@@ -23,6 +23,7 @@ from app.constants import (
 from app.errors.exceptions import BusinessException
 from app.extensions import db
 from app.models.account import Account
+from app.models.simulation_setting import SimulationSetting
 from app.models.social_account import SocialAccount
 from app.models.user import User
 from app.utils.account_number import generate_account_number
@@ -175,9 +176,15 @@ def signup(
             balance=0,
         )
 
-        db.session.add(account)
+        simulation_setting = SimulationSetting(
+            user_id=user.user_id,
+        )
 
-        # 사용자와 계좌를 한 번에 저장한다.
+        db.session.add(account)
+        db.session.add(simulation_setting)
+
+        # 사용자, 계좌, 시뮬레이션 설정을
+        # 하나의 작업으로 저장한다.
         db.session.commit()
 
     except BusinessException:
@@ -529,10 +536,15 @@ def social_signup(
             balance=0,
         )
 
+        simulation_setting = SimulationSetting(
+            user_id=user.user_id,
+        )
+
         db.session.add(social_account)
         db.session.add(account)
+        db.session.add(simulation_setting)
 
-        # User + SocialAccount + Account를
+        # User + SocialAccount + Account + SimulationSetting을
         # 하나의 작업으로 저장한다.
         db.session.commit()
 
