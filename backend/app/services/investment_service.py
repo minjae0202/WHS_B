@@ -25,8 +25,6 @@ from app.services import market_data_service
 from app.services.account_service import credit, debit, get_account_by_user_id
 from app.services.ledger_service import create_ledger
 
-# TODO: TransactionType / EntryType은 ledger_service가 이미 사용 중인 공통 Enum이다.
-#       실제 정의 위치를 확인한 뒤 아래 import 경로를 맞춘다.
 from app.constants import EntryType, TransactionType
 
 
