@@ -57,6 +57,10 @@ def create_app():
         "KAKAO_REDIRECT_URI"
     )
 
+    app.config["FSS_API_KEY"] = os.environ.get(
+        "FSS_API_KEY"
+    )
+
     # --- 확장 초기화 ---
     db.init_app(app)
     jwt.init_app(app)
