@@ -175,6 +175,14 @@ function HomePage() {
 
                 <div className="account-link-row">
 
+                  <Link to="/account">
+                    내 자산 관리
+                  </Link>
+
+                  <Link to="/my-products">
+                    내 예·적금
+                  </Link>
+
                   {provider === 'LOCAL' && (
                     <Link to="/password">
                       비밀번호 변경

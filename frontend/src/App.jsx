@@ -7,6 +7,12 @@ import OAuthCallbackPage from './pages/OAuthCallbackPage'
 import SocialSignupPage from './pages/SocialSignupPage'
 import PasswordChangePage from './pages/PasswordChangePage'
 import WithdrawPage from './pages/WithdrawPage'
+import AccountPage from './pages/AccountPage'
+import ProductsPage from './pages/ProductsPage'
+import ProductDetailPage from './pages/ProductDetailPage'
+import MyProductsPage from './pages/MyProductsPage'
+import InvestmentsPage from './pages/InvestmentsPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 
 function App() {
@@ -55,6 +61,12 @@ function App() {
         path="/withdraw"
         element={<WithdrawPage />}
       />
+
+      <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+      <Route path="/products" element={<ProductsPage />} />
+      <Route path="/products/:productId" element={<ProductDetailPage />} />
+      <Route path="/my-products" element={<ProtectedRoute><MyProductsPage /></ProtectedRoute>} />
+      <Route path="/investments" element={<ProtectedRoute><InvestmentsPage /></ProtectedRoute>} />
     </Routes>
   )
 }

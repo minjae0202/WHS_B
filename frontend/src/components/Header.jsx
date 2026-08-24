@@ -99,17 +99,17 @@ function Header() {
             홈
           </Link>
 
-          <span>
+          <Link to="/account">
             저축 목표
-          </span>
+          </Link>
 
-          <span>
+          <Link to="/products">
             예·적금
-          </span>
+          </Link>
 
-          <span>
+          <Link to="/investments">
             투자
-          </span>
+          </Link>
 
           <span>
             커뮤니티
