@@ -4,6 +4,11 @@ from app.models.simulation_setting import SimulationSetting
 from app.models.monthly_cash_flow import MonthlyCashFlow
 
 from app.models.deposits_savings import (
+    Deposit,
+    DepositPreferenceCondition,
+    Saving,
+    SavingPreferenceCondition,
+    SavingPayment,
     LedgerTransaction,
     LedgerEntry
 )
@@ -14,6 +19,7 @@ from app.services.account_service import (
 )
 
 from app.services.ledger_service import create_ledger
+from app.services.investment_service import reset_investment_data
 
 from app.errors.exceptions import BusinessException
 
@@ -123,6 +129,43 @@ def reset_simulation_data(user_id):
         )
 
     try:
+        # 주식 / ETF 데이터 초기화
+        reset_investment_data(user_id)
+
+        # 예금 데이터 초기화
+        deposit_ids = [
+            row.deposit_id
+            for row in Deposit.query.filter_by(user_id=user_id).all()
+        ]
+
+        if deposit_ids:
+            DepositPreferenceCondition.query.filter(
+                DepositPreferenceCondition.deposit_id.in_(deposit_ids)
+            ).delete(synchronize_session=False)
+
+        Deposit.query.filter_by(
+            user_id=user_id
+        ).delete(synchronize_session=False)
+
+        # 적금 데이터 초기화
+        saving_ids = [
+            row.saving_id
+            for row in Saving.query.filter_by(user_id=user_id).all()
+        ]
+
+        if saving_ids:
+            SavingPreferenceCondition.query.filter(
+                SavingPreferenceCondition.saving_id.in_(saving_ids)
+            ).delete(synchronize_session=False)
+
+            SavingPayment.query.filter(
+                SavingPayment.saving_id.in_(saving_ids)
+            ).delete(synchronize_session=False)
+
+        Saving.query.filter_by(
+            user_id=user_id
+        ).delete(synchronize_session=False)
+
         transactions = LedgerTransaction.query.filter_by(
             account_id=account.account_id
         ).all()
