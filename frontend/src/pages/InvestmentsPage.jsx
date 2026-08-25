@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import PageShell from '../components/PageShell'
-import { Notice, won } from '../components/Ui'
+import { Notice } from '../components/Ui'
+import { won } from '../utils/format'
 import { createInvestmentOrder, getApiError, getInvestmentPrice } from '../api/finance'
 
 function InvestmentsPage() {

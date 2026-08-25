@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import PageShell from '../components/PageShell'
-import { Loading, Notice, rate, shortDate, won } from '../components/Ui'
+import { Loading, Notice } from '../components/Ui'
+import { rate, shortDate, won } from '../utils/format'
 import {
   createDeposit, createSaving, getApiError, getProduct,
   simulateDeposit, simulateSaving,
 } from '../api/finance'
-import { isLoggedIn } from '../utils/token'
+import useAuth from '../hooks/useAuth'
 
 function ProductDetailPage() {
   const { productId } = useParams()
   const navigate = useNavigate()
+  const { loggedIn } = useAuth()
   const [product, setProduct] = useState(null)
   const [optionId, setOptionId] = useState('')
   const [amount, setAmount] = useState('')
@@ -25,20 +27,30 @@ function ProductDetailPage() {
     getProduct(productId).then((result) => {
       setProduct(result.data)
       const first = result.data.options.find((option) => option.is_active)
-      if (first) setOptionId(String(first.option_id))
+      if (first) {
+        setOptionId(String(first.option_id))
+        setConditionIds([])
+        setSimulation(null)
+      }
     }).catch((loadError) => setError(getApiError(loadError)))
   }, [productId])
 
   const selectedOption = useMemo(() => product?.options.find((option) => String(option.option_id) === optionId), [product, optionId])
 
-  useEffect(() => { setConditionIds([]); setSimulation(null) }, [optionId])
+  const changeOption = (nextOptionId) => {
+    if (nextOptionId === optionId) return
+
+    setOptionId(nextOptionId)
+    setConditionIds([])
+    setSimulation(null)
+  }
 
   const payload = () => product.product_type === 'DEPOSIT'
     ? { option_id: Number(optionId), principal: Number(amount), selected_condition_ids: conditionIds }
     : { option_id: Number(optionId), monthly_amount: Number(amount), payment_day: Number(paymentDay), selected_condition_ids: conditionIds }
 
   const perform = async (mode) => {
-    if (!isLoggedIn()) { navigate('/login'); return }
+    if (!loggedIn) { navigate('/login'); return }
     setBusy(true); setError(''); setMessage('')
     try {
       const isDeposit = product.product_type === 'DEPOSIT'
@@ -64,7 +76,7 @@ function ProductDetailPage() {
           <span className="card-label">상품 안내</span><h2>상품 정보</h2>
           <p className="long-description">{product.description || '금융감독원에서 제공한 상품 정보입니다.'}</p>
           <div className="option-list">
-            {product.options.map((option) => <button type="button" disabled={!option.is_active} className={`option-row ${optionId === String(option.option_id) ? 'selected' : ''}`} key={option.option_id} onClick={() => setOptionId(String(option.option_id))}>
+            {product.options.map((option) => <button type="button" disabled={!option.is_active} className={`option-row ${optionId === String(option.option_id) ? 'selected' : ''}`} key={option.option_id} onClick={() => changeOption(String(option.option_id))}>
               <span><strong>{option.term_months}개월</strong><small>{option.interest_method === 'COMPOUND' ? '월복리' : '단리'}</small></span>
               <span>기본 {rate(option.base_interest_rate)}</span><strong>최고 {rate(option.max_interest_rate)}</strong>
             </button>)}

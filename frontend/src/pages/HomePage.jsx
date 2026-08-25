@@ -1,52 +1,17 @@
 import {
-  useEffect,
-  useState,
-} from 'react'
-
-import {
   Link,
 } from 'react-router-dom'
 
 import Header from '../components/Header'
 
-import {
-  getAuthProvider,
-  isLoggedIn,
-  subscribeAuthChange,
-} from '../utils/token'
+import useAuth from '../hooks/useAuth'
 
 
 function HomePage() {
-  const [
+  const {
     loggedIn,
-    setLoggedIn,
-  ] = useState(
-    isLoggedIn(),
-  )
-
-  const [
     provider,
-    setProvider,
-  ] = useState(
-    getAuthProvider(),
-  )
-
-
-  useEffect(() => {
-    const updateAuthState = () => {
-      setLoggedIn(
-        isLoggedIn(),
-      )
-
-      setProvider(
-        getAuthProvider(),
-      )
-    }
-
-    return subscribeAuthChange(
-      updateAuthState,
-    )
-  }, [])
+  } = useAuth()
 
 
   return (

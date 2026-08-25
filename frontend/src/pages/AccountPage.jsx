@@ -1,12 +1,24 @@
 import { useEffect, useState } from 'react'
 import PageShell from '../components/PageShell'
-import { Loading, Notice, won } from '../components/Ui'
+import { Loading, Notice } from '../components/Ui'
+import { won } from '../utils/format'
 import {
   getAccount, getApiError, getSimulationSettings, payMonthlyIncome,
   resetSimulation, setInitialAsset, updateSimulationSettings,
 } from '../api/finance'
 
 const currentMonth = new Date().toISOString().slice(0, 7)
+
+async function fetchAccountData() {
+  const [accountResult, settingsResult] = await Promise.all([
+    getAccount(), getSimulationSettings(),
+  ])
+
+  return {
+    account: accountResult.data,
+    settings: settingsResult.data,
+  }
+}
 
 function AccountPage() {
   const [account, setAccount] = useState(null)
@@ -21,19 +33,39 @@ function AccountPage() {
 
   const load = async () => {
     try {
-      const [accountResult, settingsResult] = await Promise.all([
-        getAccount(), getSimulationSettings(),
-      ])
-      setAccount(accountResult.data)
-      setSettings(settingsResult.data)
-      setMonthlyIncome(String(settingsResult.data.monthly_income ?? 0))
-      setMonthlyExpense(String(settingsResult.data.monthly_expense ?? 0))
+      const result = await fetchAccountData()
+
+      setAccount(result.account)
+      setSettings(result.settings)
+      setMonthlyIncome(String(result.settings.monthly_income ?? 0))
+      setMonthlyExpense(String(result.settings.monthly_expense ?? 0))
     } catch (loadError) {
       setError(getApiError(loadError))
     }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    let ignore = false
+
+    fetchAccountData()
+      .then((result) => {
+        if (ignore) return
+
+        setAccount(result.account)
+        setSettings(result.settings)
+        setMonthlyIncome(String(result.settings.monthly_income ?? 0))
+        setMonthlyExpense(String(result.settings.monthly_expense ?? 0))
+      })
+      .catch((loadError) => {
+        if (!ignore) {
+          setError(getApiError(loadError))
+        }
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [])
 
   const run = async (action) => {
     setBusy(true); setError(''); setMessage('')

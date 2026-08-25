@@ -1,8 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageShell from '../components/PageShell'
-import { Empty, Loading, Notice, rate, won } from '../components/Ui'
+import { Empty, Loading, Notice } from '../components/Ui'
+import { rate, won } from '../utils/format'
 import { getApiError, getProducts } from '../api/finance'
+
+async function fetchProducts(filters) {
+  const params = { is_active: true, size: 100 }
+
+  if (filters.product_type) params.product_type = filters.product_type
+  if (filters.bank_name) params.bank_name = filters.bank_name
+
+  const result = await getProducts(params)
+
+  return result.data.items
+}
 
 function ProductsPage() {
   const [filters, setFilters] = useState({ product_type: '', bank_name: '' })
@@ -10,25 +22,55 @@ function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const load = async () => {
+  const load = async (nextFilters = filters) => {
     setLoading(true); setError('')
+
     try {
-      const params = { is_active: true, size: 100 }
-      if (filters.product_type) params.product_type = filters.product_type
-      if (filters.bank_name) params.bank_name = filters.bank_name
-      const result = await getProducts(params)
-      setProducts(result.data.items)
+      const items = await fetchProducts(nextFilters)
+      setProducts(items)
     } catch (loadError) {
       setError(getApiError(loadError))
-    } finally { setLoading(false) }
+    } finally {
+      setLoading(false)
+    }
   }
 
-  useEffect(() => { load() }, [filters.product_type])
+  useEffect(() => {
+    let ignore = false
+
+    fetchProducts({ product_type: '', bank_name: '' })
+      .then((items) => {
+        if (ignore) return
+
+        setProducts(items)
+        setLoading(false)
+      })
+      .catch((loadError) => {
+        if (ignore) return
+
+        setError(getApiError(loadError))
+        setLoading(false)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [])
+
+  const changeProductType = (productType) => {
+    const nextFilters = {
+      ...filters,
+      product_type: productType,
+    }
+
+    setFilters(nextFilters)
+    load(nextFilters)
+  }
 
   return (
     <PageShell eyebrow="금융상품 체험" title="예·적금 상품" description="실제 금융상품 데이터를 비교하고 예상 만기금액을 확인해보세요." actions={<Link className="service-secondary-button" to="/my-products">내 예·적금</Link>}>
       <form className="filter-bar" onSubmit={(event) => { event.preventDefault(); load() }}>
-        <select value={filters.product_type} onChange={(event) => setFilters({ ...filters, product_type: event.target.value })}><option value="">예금·적금 전체</option><option value="DEPOSIT">예금</option><option value="SAVING">적금</option></select>
+        <select value={filters.product_type} onChange={(event) => changeProductType(event.target.value)}><option value="">예금·적금 전체</option><option value="DEPOSIT">예금</option><option value="SAVING">적금</option></select>
         <input placeholder="은행명으로 검색" value={filters.bank_name} onChange={(event) => setFilters({ ...filters, bank_name: event.target.value })} />
         <button>상품 검색</button>
       </form>
