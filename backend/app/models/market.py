@@ -3,9 +3,10 @@ from datetime import datetime
 from sqlalchemy import Numeric
 
 from app.extensions import db
+from app.models.base import TimestampMixin
 
 
-class MarketAsset(db.Model):
+class MarketAsset(TimestampMixin, db.Model):
     """시장 자산 (주식 / ETF 종목 정보)"""
 
     __tablename__ = "market_assets"
@@ -16,18 +17,6 @@ class MarketAsset(db.Model):
     asset_type = db.Column(db.String(10), nullable=False)   # STOCK | ETF
     market = db.Column(db.String(2), nullable=False)        # KR | US
     is_active = db.Column(db.Boolean, nullable=False, default=True)
-
-    created_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-    )
-    updated_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
-    )
 
     def __repr__(self):
         return f"<MarketAsset {self.symbol} ({self.market})>"

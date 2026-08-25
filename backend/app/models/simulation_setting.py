@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from app.extensions import db
+from app.models.base import TimestampMixin
 
 
-class SimulationSetting(db.Model):
+class SimulationSetting(TimestampMixin, db.Model):
     __tablename__ = "simulation_settings"
 
     simulation_setting_id = db.Column(
@@ -41,19 +40,6 @@ class SimulationSetting(db.Model):
         db.BigInteger,
         nullable=False,
         default=0
-    )
-
-    created_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow
-    )
-
-    updated_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow
     )
 
     __table_args__ = (

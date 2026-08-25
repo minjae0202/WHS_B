@@ -29,5 +29,6 @@ def get_my_account():
             "account_number": account.account_number,
             "balance": account.balance,
             "currency": "KRW"
-        }
+        },
+        "message": "요청이 성공했습니다."
     }), 200

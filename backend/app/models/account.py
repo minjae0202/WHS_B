@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from app.extensions import db
+from app.models.base import TimestampMixin
 
 
-class Account(db.Model):
+class Account(TimestampMixin, db.Model):
     __tablename__ = "accounts"
 
     account_id = db.Column(
@@ -29,19 +28,6 @@ class Account(db.Model):
         db.BigInteger,
         nullable=False,
         default=0,
-    )
-
-    created_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-    )
-
-    updated_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
     )
 
     def __repr__(self):

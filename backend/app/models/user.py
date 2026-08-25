@@ -1,10 +1,9 @@
-from datetime import datetime
-
 from app.constants import UserRole, UserStatus
 from app.extensions import db
+from app.models.base import TimestampMixin
 
 
-class User(db.Model):
+class User(TimestampMixin, db.Model):
     __tablename__ = "users"
 
     user_id = db.Column(
@@ -62,19 +61,6 @@ class User(db.Model):
         db.Integer,
         nullable=False,
         default=0,
-    )
-
-    created_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-    )
-
-    updated_at = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
     )
 
     def __repr__(self):
