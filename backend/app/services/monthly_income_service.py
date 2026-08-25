@@ -80,7 +80,18 @@ def pay_monthly_income(user_id, year_month):
     monthly_income = setting.monthly_income
 
     try:
-        # 5. 월 수입이 0원보다 클 경우 계좌 입금 + 원장 기록
+        # 5. 해당 월 지급 기록을 먼저 생성하여 원장 reference_id 확보
+        cash_flow = MonthlyCashFlow(
+            user_id=user_id,
+            year_month=year_month,
+            income_amount=monthly_income,
+            status=MonthlyCashFlowStatus.PROCESSED.value
+        )
+
+        db.session.add(cash_flow)
+        db.session.flush()
+
+        # 6. 월 수입이 0원보다 클 경우 계좌 입금 + 원장 기록
         if monthly_income > 0:
             credit(
                 account=account,
@@ -93,18 +104,8 @@ def pay_monthly_income(user_id, year_month):
                 amount=monthly_income,
                 entry_type=EntryType.CREDIT.value,
                 reference_type="MONTHLY_CASH_FLOW",
-                reference_id=None
+                reference_id=cash_flow.monthly_cash_flow_id
             )
-
-        # 6. 해당 월 지급 기록 생성
-        cash_flow = MonthlyCashFlow(
-            user_id=user_id,
-            year_month=year_month,
-            income_amount=monthly_income,
-            status=MonthlyCashFlowStatus.PROCESSED.value
-        )
-
-        db.session.add(cash_flow)
 
         # 7. 모든 작업 성공 시 한 번만 commit
         db.session.commit()
