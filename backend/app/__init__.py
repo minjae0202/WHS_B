@@ -86,9 +86,6 @@ def create_app():
     from app.routes.users import users_bp
     app.register_blueprint(users_bp)
 
-    # from app.routes.accounts import accounts_bp
-    # app.register_blueprint(accounts_bp)
-
     from app.routes.investments import investments_bp
     app.register_blueprint(investments_bp)
 

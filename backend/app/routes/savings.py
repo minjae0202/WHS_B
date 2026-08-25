@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from marshmallow import ValidationError
 
 from app.errors.exceptions import BusinessException
+from app.routes._helpers import load_query_or_raise, require_json_body, success_response
 from app.schemas.deposits_savings import ContractListQuerySchema, PaymentListQuerySchema, SavingRequestSchema
 from app.services import saving_service
 
@@ -10,23 +10,22 @@ savings_bp = Blueprint("savings", __name__, url_prefix="/api/savings")
 
 
 def _body():
-    value = request.get_json(silent=True)
-    if not isinstance(value, dict): raise BusinessException(code="INVALID_REQUEST", message="JSON 객체 형식의 요청 본문이 필요합니다.", status_code=400)
+    value = require_json_body()
     day = value.get("payment_day")
-    if type(day) is int and not 1 <= day <= 28: raise BusinessException(code="INVALID_PAYMENT_DAY", message="자동이체일은 1~28이어야 합니다.", status_code=422)
+    if type(day) is int and not 1 <= day <= 28:
+        raise BusinessException(code="INVALID_PAYMENT_DAY", message="자동이체일은 1~28이어야 합니다.", status_code=400)
     return SavingRequestSchema().load(value)
 
 
 def _success(data, status=200):
-    return jsonify({"success": True, "data": data, "message": "요청이 성공했습니다."}), status
+    return success_response(data, status)
 
 
 def _filters(schema, status_code):
-    try: return schema.load(request.args)
-    except ValidationError as error:
-        if "status" in error.messages: raise BusinessException(code=status_code, message="지원하지 않는 상태입니다.", status_code=400)
-        if "page" in error.messages or "size" in error.messages: raise BusinessException(code="INVALID_PAGINATION", message="page 또는 size 범위가 올바르지 않습니다.", status_code=400)
-        raise
+    return load_query_or_raise(schema, [
+        (("status",), status_code, "지원하지 않는 상태입니다."),
+        (("page", "size"), "INVALID_PAGINATION", "page 또는 size 범위가 올바르지 않습니다."),
+    ])
 
 
 @savings_bp.post("/simulate")

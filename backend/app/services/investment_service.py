@@ -6,11 +6,9 @@
 주문 서비스가 마지막에 한 번만 commit한다.
 """
 
-from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
+from decimal import Decimal
 
 from app.constants import (
-    FEE_RATE,
-    KR_SELL_TAX_RATE,
     LEDGER_REFERENCE_TYPE_MARKET,
     TRADABLE_SESSIONS,
     AssetType,
@@ -23,6 +21,13 @@ from app.extensions import db
 from app.models.market import MarketAsset, MarketHolding, MarketTransaction
 from app.services import market_data_service
 from app.services.account_service import credit, debit, get_account_by_user_id
+from app.services.investment_calculations import (
+    calculate_fee,
+    calculate_settlement,
+    calculate_tax,
+    serialize_price,
+    to_krw,
+)
 from app.services.ledger_service import create_ledger
 
 from app.constants import EntryType, TransactionType
@@ -47,7 +52,7 @@ def get_price(symbol, market):
         "market": market.value,
         "name": quote["name"],
         "asset_type": _resolve_asset_type(symbol, market).value,
-        "price": _serialize_price(quote["price"], market),
+        "price": serialize_price(quote["price"], market),
         "currency": quote["currency"],
         "market_session": session.value,
         "is_tradable": session in TRADABLE_SESSIONS[market],
@@ -58,7 +63,7 @@ def get_price(symbol, market):
         exchange_rate = market_data_service.fetch_exchange_rate()
 
         result["exchange_rate"] = float(exchange_rate)
-        result["price_krw"] = _to_krw(quote["price"], exchange_rate)
+        result["price_krw"] = to_krw(quote["price"], exchange_rate)
 
     return result
 
@@ -101,11 +106,11 @@ def create_order(user_id, symbol, market, side, quantity):
             asset = _get_or_create_asset(symbol, market, quote["name"])
 
         amount = quote["price"] * quantity
-        amount_krw = _to_krw(amount, exchange_rate)
-        fee = _calculate_fee(amount_krw, market)
-        tax = _calculate_tax(amount_krw, market, side)
+        amount_krw = to_krw(amount, exchange_rate)
+        fee = calculate_fee(amount_krw, market)
+        tax = calculate_tax(amount_krw, market, side)
 
-        settlement_amount_krw = _calculate_settlement(
+        settlement_amount_krw = calculate_settlement(
             amount_krw, fee, tax, side
         )
 
@@ -201,64 +206,6 @@ def reset_investment_data(user_id):
         "deleted_holdings": deleted_holdings,
         "deleted_transactions": deleted_transactions,
     }
-
-
-# ---------------------------------------------------------------- 금액 계산
-
-def _to_krw(amount, exchange_rate):
-    """거래 통화 금액을 원화 정수로 환산한다."""
-    if exchange_rate is not None:
-        amount = amount * exchange_rate
-
-    return int(amount.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
-
-
-def _calculate_fee(amount_krw, market):
-    """거래 수수료를 계산한다. 사용자에게 유리하도록 절사한다."""
-    fee = Decimal(amount_krw) * FEE_RATE[market]
-
-    return int(fee.quantize(Decimal("1"), rounding=ROUND_DOWN))
-
-
-def _calculate_tax(amount_krw, market, side):
-    """국내 매도 시에만 증권거래세를 부과한다."""
-    if market != Market.KR or side != OrderSide.SELL:
-        return 0
-
-    tax = Decimal(amount_krw) * KR_SELL_TAX_RATE
-
-    return int(tax.quantize(Decimal("1"), rounding=ROUND_DOWN))
-
-
-def _calculate_settlement(amount_krw, fee, tax, side):
-    """
-    실제 계좌 증감 금액을 계산한다.
-
-    매수: 거래금액 + 수수료
-    매도: 거래금액 - 수수료 - 세금
-    """
-    if side == OrderSide.BUY:
-        settlement = amount_krw + fee
-    else:
-        settlement = amount_krw - fee - tax
-
-    # debit() / credit()은 0 이하 금액을 INVALID_AMOUNT로 거부한다
-    if settlement <= 0:
-        raise BusinessException(
-            code=InvestmentErrorCode.INVALID_AMOUNT,
-            message="정산 금액이 0원 이하여서 주문할 수 없습니다.",
-            status_code=422,
-        )
-
-    return settlement
-
-
-def _serialize_price(price, market):
-    """원화는 정수, 달러는 소수로 응답한다."""
-    if market == Market.KR:
-        return int(price.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
-
-    return float(price)
 
 
 # ---------------------------------------------------------------- 시장 상태
@@ -439,14 +386,14 @@ def _build_order_result(
         "asset_type": asset.asset_type,
         "side": transaction.side,
         "quantity": int(transaction.quantity),
-        "price": _serialize_price(transaction.price, market),
+        "price": serialize_price(transaction.price, market),
         "currency": "KRW" if market == Market.KR else "USD",
         "exchange_rate": (
             float(transaction.exchange_rate)
             if transaction.exchange_rate is not None
             else None
         ),
-        "amount": _serialize_price(transaction.amount, market),
+        "amount": serialize_price(transaction.amount, market),
         "amount_krw": transaction.amount_krw,
         "fee": transaction.fee,
         "tax": transaction.tax,
