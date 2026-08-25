@@ -39,6 +39,15 @@ def snapshots(items):
              "additional_interest_rate": rate(x.additional_interest_rate)} for x in items]
 
 
+def _termination_detail(item):
+    return {"selected_conditions": snapshots(item.preference_conditions),
+            "gross_interest": item.gross_interest, "tax_rate": rate(item.tax_rate),
+            "tax_amount": item.tax_amount, "net_interest": item.net_interest,
+            "payout_amount": item.payout_amount,
+            "applied_early_termination_rate": rate(item.applied_early_termination_rate),
+            "matured_at": iso(item.matured_at), "terminated_at": iso(item.terminated_at)}
+
+
 def deposit(item, detail=False):
     data = {"deposit_id": item.deposit_id, "product_id": item.product_id,
             "option_id": item.option_id, "bank_name": item.product.bank_name,
@@ -47,12 +56,7 @@ def deposit(item, detail=False):
             "interest_method": item.interest_method, "start_date": iso(item.start_date),
             "maturity_date": iso(item.maturity_date), "status": item.status}
     if detail:
-        data.update({"selected_conditions": snapshots(item.preference_conditions),
-                     "gross_interest": item.gross_interest, "tax_rate": rate(item.tax_rate),
-                     "tax_amount": item.tax_amount, "net_interest": item.net_interest,
-                     "payout_amount": item.payout_amount,
-                     "applied_early_termination_rate": rate(item.applied_early_termination_rate),
-                     "matured_at": iso(item.matured_at), "terminated_at": iso(item.terminated_at)})
+        data.update(_termination_detail(item))
     return data
 
 
@@ -76,10 +80,5 @@ def saving(item, detail=False):
             "next_payment_date": iso(item.next_payment_date), "start_date": iso(item.start_date),
             "maturity_date": iso(item.maturity_date), "status": item.status}
     if detail:
-        data.update({"selected_conditions": snapshots(item.preference_conditions),
-                     "gross_interest": item.gross_interest, "tax_rate": rate(item.tax_rate),
-                     "tax_amount": item.tax_amount, "net_interest": item.net_interest,
-                     "payout_amount": item.payout_amount,
-                     "applied_early_termination_rate": rate(item.applied_early_termination_rate),
-                     "matured_at": iso(item.matured_at), "terminated_at": iso(item.terminated_at)})
+        data.update(_termination_detail(item))
     return data
