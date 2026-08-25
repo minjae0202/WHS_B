@@ -1,9 +1,4 @@
 import {
-  useEffect,
-  useState,
-} from 'react'
-
-import {
   Link,
   useNavigate,
 } from 'react-router-dom'
@@ -12,11 +7,10 @@ import {
   logout,
 } from '../api/auth'
 
+import useAuth from '../hooks/useAuth'
+
 import {
-  getAuthProvider,
-  isLoggedIn,
   removeTokens,
-  subscribeAuthChange,
 } from '../utils/token'
 
 
@@ -24,36 +18,10 @@ function Header() {
   const navigate =
     useNavigate()
 
-  const [
+  const {
     loggedIn,
-    setLoggedIn,
-  ] = useState(
-    isLoggedIn(),
-  )
-
-  const [
     provider,
-    setProvider,
-  ] = useState(
-    getAuthProvider(),
-  )
-
-
-  useEffect(() => {
-    const updateAuthState = () => {
-      setLoggedIn(
-        isLoggedIn(),
-      )
-
-      setProvider(
-        getAuthProvider(),
-      )
-    }
-
-    return subscribeAuthChange(
-      updateAuthState,
-    )
-  }, [])
+  } = useAuth()
 
 
   const handleLogout =

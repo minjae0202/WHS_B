@@ -1,4 +1,4 @@
-import api from './auth'
+import api from './client'
 
 export const getAccount = async () => (await api.get('/accounts/me')).data
 export const getSimulationSettings = async () => (await api.get('/simulation/settings')).data

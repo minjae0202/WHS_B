@@ -1,11 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageShell from '../components/PageShell'
-import { Empty, Loading, Notice, StatusBadge, rate, shortDate, won } from '../components/Ui'
+import { Empty, Loading, Notice, StatusBadge } from '../components/Ui'
+import { rate, shortDate, won } from '../utils/format'
 import {
   getApiError, getDeposit, getDeposits, getSaving, getSavingPayments,
   getSavings, terminateDeposit, terminateSaving,
 } from '../api/finance'
+
+async function fetchMyProducts() {
+  const [depositResult, savingResult] = await Promise.all([
+    getDeposits({ size: 100 }), getSavings({ size: 100 }),
+  ])
+
+  return {
+    deposits: depositResult.data.items,
+    savings: savingResult.data.items,
+  }
+}
 
 function MyProductsPage() {
   const [tab, setTab] = useState('DEPOSIT')
@@ -20,17 +32,47 @@ function MyProductsPage() {
   const load = async () => {
     setLoading(true); setError('')
     try {
-      const [depositResult, savingResult] = await Promise.all([
-        getDeposits({ size: 100 }), getSavings({ size: 100 }),
-      ])
-      setDeposits(depositResult.data.items)
-      setSavings(savingResult.data.items)
-    } catch (loadError) { setError(getApiError(loadError)) }
-    finally { setLoading(false) }
+      const result = await fetchMyProducts()
+
+      setDeposits(result.deposits)
+      setSavings(result.savings)
+    } catch (loadError) {
+      setError(getApiError(loadError))
+    } finally {
+      setLoading(false)
+    }
   }
 
-  useEffect(() => { load() }, [])
-  useEffect(() => { setSelected(null); setPayments([]) }, [tab])
+  useEffect(() => {
+    let ignore = false
+
+    fetchMyProducts()
+      .then((result) => {
+        if (ignore) return
+
+        setDeposits(result.deposits)
+        setSavings(result.savings)
+        setLoading(false)
+      })
+      .catch((loadError) => {
+        if (ignore) return
+
+        setError(getApiError(loadError))
+        setLoading(false)
+      })
+
+    return () => {
+      ignore = true
+    }
+  }, [])
+
+  const changeTab = (nextTab) => {
+    if (nextTab === tab) return
+
+    setTab(nextTab)
+    setSelected(null)
+    setPayments([])
+  }
 
   const openDetail = async (item) => {
     setError('')
@@ -65,7 +107,7 @@ function MyProductsPage() {
   return (
     <PageShell eyebrow="내 금융상품" title="내 예·적금" description="가입한 예금과 적금의 운용 상태와 납입 내역을 확인하세요." actions={<Link className="service-primary-button" to="/products">상품 둘러보기</Link>}>
       <Notice type="success">{message}</Notice><Notice type="error">{error}</Notice>
-      <div className="tab-bar"><button className={tab === 'DEPOSIT' ? 'active' : ''} onClick={() => setTab('DEPOSIT')}>예금 <span>{deposits.length}</span></button><button className={tab === 'SAVING' ? 'active' : ''} onClick={() => setTab('SAVING')}>적금 <span>{savings.length}</span></button></div>
+      <div className="tab-bar"><button className={tab === 'DEPOSIT' ? 'active' : ''} onClick={() => changeTab('DEPOSIT')}>예금 <span>{deposits.length}</span></button><button className={tab === 'SAVING' ? 'active' : ''} onClick={() => changeTab('SAVING')}>적금 <span>{savings.length}</span></button></div>
       {loading ? <Loading /> : items.length === 0 ? <Empty>가입한 {tab === 'DEPOSIT' ? '예금' : '적금'}이 없습니다.</Empty> : (
         <div className="contract-layout">
           <div className="contract-list">{items.map((item) => {
