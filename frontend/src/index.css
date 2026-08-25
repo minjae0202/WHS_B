@@ -941,7 +941,7 @@ button:disabled {
 .field-label { display: block; margin: 18px 0 8px; color: #344b5b; font-size: 12px; font-weight: 800; }
 .field-spaced { margin-top: 20px; }
 
-.service-card input,
+.service-card input:not([type="checkbox"]),
 .service-card select,
 .filter-bar input,
 .filter-bar select,
@@ -955,7 +955,7 @@ button:disabled {
   color: #294456;
 }
 
-.service-card input:focus,
+.service-card input:not([type="checkbox"]):focus,
 .service-card select:focus,
 .filter-bar input:focus,
 .filter-bar select:focus { border-color: #087ed0; box-shadow: 0 0 0 3px rgba(8,126,208,.07); }
@@ -1024,6 +1024,8 @@ button:disabled {
 .condition-box label span b { color: #344c5b; font-size: 12px; }
 .condition-box label span small { margin-top: 4px; color: #84919a; font-size: 10px; line-height: 1.4; }
 .condition-box label em { color: #087ed0; font-size: 11px; font-style: normal; font-weight: 800; }
+.condition-box input[type="checkbox"] { width: 16px; height: 16px; margin: 1px 0 0; padding: 0; accent-color: #087ed0; }
+.condition-box input[type="checkbox"]:focus-visible { outline: 2px solid rgba(8,126,208,.3); outline-offset: 2px; }
 .button-row { margin-top: 22px; }
 .button-row > * { flex: 1; }
 .result-panel { margin-top: 20px; padding: 25px; display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; border: 1px solid #cfe3f0; border-radius: 14px; background: #eff8fd; }
