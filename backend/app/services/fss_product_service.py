@@ -68,8 +68,10 @@ def sync_products():
                     if option is None: option=FinancialProductOption(product_id=product.product_id,term_months=term,interest_method=method); db.session.add(option)
                     base=Decimal(str(item.get("intr_rate") or 0)); maximum=max(base,Decimal(str(item.get("intr_rate2") or 0)))
                     option.base_interest_rate=base; option.max_interest_rate=maximum; option.is_active=product.is_active
-                    option.min_amount=100000 if product_type=="DEPOSIT" else 10000
-                    option.max_amount=int(raw.get("max_limit") or 100000000); db.session.flush(); options_count+=1
+                    min_amount=100000 if product_type=="DEPOSIT" else 10000
+                    max_amount=int(raw.get("max_limit") or 100000000)
+                    option.min_amount=1 if min_amount > max_amount else min_amount
+                    option.max_amount=max_amount; db.session.flush(); options_count+=1
                     bonus=maximum-base
                     parsed_conditions = parse_preference_conditions(raw.get("spcl_cnd"), bonus)
                     active_codes = {item["condition_code"] for item in parsed_conditions}
