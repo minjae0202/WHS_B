@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from app.models.simulation_setting import SimulationSetting
 from app.models.monthly_cash_flow import MonthlyCashFlow
@@ -7,8 +8,8 @@ from app.services.monthly_income_service import pay_monthly_income
 
 
 def process_monthly_incomes():
-    # 현재 UTC 기준 연-월
-    now = datetime.now(timezone.utc)
+    # 현재 한국 시간 기준 연-월
+    now = datetime.now(ZoneInfo("Asia/Seoul"))
     year_month = now.strftime("%Y-%m")
 
     # 시뮬레이션 설정이 존재하는 모든 사용자 조회
