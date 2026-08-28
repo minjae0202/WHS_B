@@ -13,7 +13,7 @@ from app.models.monthly_cash_flow import MonthlyCashFlow
 from app.models.simulation_setting import SimulationSetting
 
 
-def delete_user_financial_data(user_id):
+def delete_simulation_activity(user_id):
     # 예금에 연결된 우대조건 삭제
     deposit_ids = [
         deposit_id
@@ -84,6 +84,10 @@ def delete_user_financial_data(user_id):
     MonthlyCashFlow.query.filter_by(
         user_id=user_id
     ).delete(synchronize_session=False)
+
+
+def delete_user_financial_data(user_id):
+    delete_simulation_activity(user_id)
 
     # 시뮬레이션 설정 삭제
     SimulationSetting.query.filter_by(

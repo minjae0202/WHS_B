@@ -1,19 +1,13 @@
 from app.extensions import db
 
 from app.models.simulation_setting import SimulationSetting
-from app.models.monthly_cash_flow import MonthlyCashFlow
-
-from app.models.deposits_savings import (
-    LedgerTransaction,
-    LedgerEntry
-)
-
 from app.services.account_service import (
     get_account_by_user_id,
     credit
 )
 
 from app.services.ledger_service import create_ledger
+from app.services.financial_cleanup_service import delete_simulation_activity
 
 from app.errors.exceptions import BusinessException
 
@@ -123,35 +117,7 @@ def reset_simulation_data(user_id):
         )
 
     try:
-        transactions = LedgerTransaction.query.filter_by(
-            account_id=account.account_id
-        ).all()
-
-        transaction_ids = [
-            transaction.ledger_transaction_id
-            for transaction in transactions
-        ]
-
-        if transaction_ids:
-            LedgerEntry.query.filter(
-                LedgerEntry.ledger_transaction_id.in_(
-                    transaction_ids
-                )
-            ).delete(
-                synchronize_session=False
-            )
-
-        LedgerTransaction.query.filter_by(
-            account_id=account.account_id
-        ).delete(
-            synchronize_session=False
-        )
-
-        MonthlyCashFlow.query.filter_by(
-            user_id=user_id
-        ).delete(
-            synchronize_session=False
-        )
+        delete_simulation_activity(user_id)
 
         account.balance = 0
 
