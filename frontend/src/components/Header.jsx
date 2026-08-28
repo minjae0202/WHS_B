@@ -67,10 +67,6 @@ function Header() {
             홈
           </Link>
 
-          <Link to="/account">
-            저축 목표
-          </Link>
-
           <Link to="/products">
             예·적금
           </Link>
