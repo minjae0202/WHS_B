@@ -105,6 +105,9 @@ def create_app():
     from app.routes.account import account_bp
     app.register_blueprint(account_bp)
 
+    from app.routes.health import health_bp
+    app.register_blueprint(health_bp)
+
     # --- 공통 에러 핸들러 (개발 가이드 8번) ---
     @app.errorhandler(BusinessException)
     def handle_business_exception(e):

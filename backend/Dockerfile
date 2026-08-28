@@ -19,8 +19,7 @@ RUN apt-get update \
 
 # 의존성 레이어 캐시: requirements.txt만 먼저 복사
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir "gunicorn==23.0.0"
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 애플리케이션 코드
 COPY . .
@@ -33,7 +32,7 @@ USER appuser
 EXPOSE 5000
 
 # 컨테이너 헬스체크 (스크립트는 docker-healthcheck.py 참고)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+HEALTHCHECK --interval=60s --timeout=5s --start-period=20s --retries=3 \
     CMD ["python", "/app/docker-healthcheck.py"]
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
