@@ -55,9 +55,10 @@ function Header() {
         <Link
           to="/"
           className="site-logo"
+          aria-label="SeedTheMoa 홈"
         >
-          WHS
-          <span>Finance</span>
+          Seed
+          <span>TheMoa</span>
         </Link>
 
 

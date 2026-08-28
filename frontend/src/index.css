@@ -778,8 +778,15 @@ button {
       calc(100% - 28px);
   }
 
+  .site-logo {
+    gap: 4px;
+    margin-right: 12px;
+
+    font-size: 19px;
+  }
+
   .site-logo span {
-    display: none;
+    font-size: 15px;
   }
 
   .header-text-link {
