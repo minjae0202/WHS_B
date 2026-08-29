@@ -32,7 +32,7 @@ USER appuser
 EXPOSE 5000
 
 # 컨테이너 헬스체크 (스크립트는 docker-healthcheck.py 참고)
-HEALTHCHECK --interval=60s --timeout=5s --start-period=20s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD ["python", "/app/docker-healthcheck.py"]
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
