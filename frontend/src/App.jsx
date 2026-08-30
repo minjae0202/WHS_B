@@ -13,10 +13,13 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import MyProductsPage from './pages/MyProductsPage'
 import InvestmentsPage from './pages/InvestmentsPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import Toast from './components/Toast'
 
 
 function App() {
   return (
+    <>
+    <Toast />
     <Routes>
       <Route
         path="/"
@@ -68,6 +71,7 @@ function App() {
       <Route path="/my-products" element={<ProtectedRoute><MyProductsPage /></ProtectedRoute>} />
       <Route path="/investments" element={<ProtectedRoute><InvestmentsPage /></ProtectedRoute>} />
     </Routes>
+    </>
   )
 }
 

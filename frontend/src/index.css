@@ -1095,6 +1095,23 @@ button:disabled {
 .order-result p { margin: 0; color: #76868f; font-size: 11px; }
 .order-result p strong { display: block; margin-top: 6px; color: #294657; font-size: 14px; }
 
+.toast-viewport { position: fixed; top: 82px; right: 24px; z-index: 2000; width: min(360px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast-message { min-height: 54px; padding: 13px 14px; display: grid; grid-template-columns: 24px 1fr 24px; gap: 9px; align-items: center; border: 1px solid #cfe5d8; border-radius: 10px; background: #f2fbf6; box-shadow: 0 12px 32px rgba(35, 62, 78, .16); color: #286447; pointer-events: auto; animation: toast-in .18s ease-out; }
+.toast-message > span { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; background: #2d8b61; color: #fff; font-size: 12px; font-weight: 900; }
+.toast-message p { margin: 0; font-size: 13px; font-weight: 700; line-height: 1.45; }
+.toast-message button { padding: 0; border: 0; background: transparent; color: currentColor; font-size: 21px; line-height: 1; cursor: pointer; }
+.toast-error { border-color: #efd1d1; background: #fff5f5; color: #9e3535; }
+.toast-error > span { background: #c94a4a; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.confirm-backdrop { position: fixed; inset: 0; z-index: 2100; display: grid; place-items: center; padding: 20px; background: rgba(21, 38, 50, .42); }
+.confirm-dialog { width: min(420px, 100%); padding: 28px; border-radius: 14px; background: #fff; box-shadow: 0 24px 70px rgba(20, 40, 55, .24); }
+.confirm-dialog h2 { margin: 0 0 12px; color: #173b54; font-size: 20px; }
+.confirm-dialog p { margin: 0; color: #657984; font-size: 14px; line-height: 1.65; white-space: pre-line; }
+.confirm-dialog > div { margin-top: 24px; display: flex; justify-content: flex-end; gap: 9px; }
+.confirm-dialog button { min-width: 84px; height: 42px; border-radius: 7px; font-weight: 800; cursor: pointer; }
+.confirm-cancel { border: 1px solid #d7e0e5; background: #fff; color: #5e717d; }
+.confirm-accept { border: 0; background: #087ed0; color: #fff; }
+
 @media (max-width: 900px) {
   .product-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .detail-layout, .investment-layout { grid-template-columns: 1fr; }
@@ -1104,6 +1121,7 @@ button:disabled {
 }
 
 @media (max-width: 650px) {
+  .toast-viewport { top: 70px; right: 16px; }
   .service-page { padding-top: 32px; }
   .service-container { width: calc(100% - 28px); }
   .service-heading { align-items: flex-start; flex-direction: column; }
