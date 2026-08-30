@@ -5,7 +5,8 @@ from app.models.simulation_setting import SimulationSetting
 
 from app.services.account_service import (
     get_account_by_user_id,
-    credit
+    credit,
+    debit
 )
 
 from app.services.ledger_service import create_ledger
@@ -78,6 +79,7 @@ def pay_monthly_income(user_id, year_month):
     account = get_account_by_user_id(user_id)
 
     monthly_income = setting.monthly_income
+    monthly_expense = setting.monthly_expense
 
     try:
         # 5. 해당 월 지급 기록을 먼저 생성하여 원장 reference_id 확보
@@ -106,8 +108,23 @@ def pay_monthly_income(user_id, year_month):
                 reference_type="MONTHLY_CASH_FLOW",
                 reference_id=cash_flow.monthly_cash_flow_id
             )
+        # 7. 월 예상 지출이 0원보다 클 경우 계좌 차감 + 원장 기록
+        if monthly_expense > 0:
+            debit(
+                account=account,
+                amount=monthly_expense
+            )
 
-        # 7. 모든 작업 성공 시 한 번만 commit
+            create_ledger(
+                account=account,
+                transaction_type=TransactionType.MONTHLY_EXPENSE.value,
+                amount=monthly_expense,
+                entry_type=EntryType.DEBIT.value,
+                reference_type="MONTHLY_CASH_FLOW",
+                reference_id=cash_flow.monthly_cash_flow_id
+            )
+
+        # 8. 모든 작업 성공 시 한 번만 commit
         db.session.commit()
 
         return account, cash_flow
