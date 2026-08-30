@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom'
 
 import Header from '../components/Header'
+import { showToast } from '../components/Toast'
 
 import {
   changePassword,
@@ -146,7 +147,7 @@ function PasswordChangePage() {
 
         removeTokens()
 
-        alert(
+        showToast(
           '비밀번호가 변경되었습니다. 다시 로그인해주세요.',
         )
 

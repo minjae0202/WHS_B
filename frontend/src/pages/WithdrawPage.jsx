@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom'
 
 import Header from '../components/Header'
+import { confirmAction, showToast } from '../components/Toast'
 
 import {
   withdrawLocalAccount,
@@ -101,7 +102,7 @@ function WithdrawPage() {
 
 
       const result =
-        window.confirm(
+        await confirmAction(
           '정말 회원탈퇴하시겠습니까?\n탈퇴 후 되돌릴 수 없습니다.',
         )
 
@@ -121,7 +122,7 @@ function WithdrawPage() {
 
         removeTokens()
 
-        alert(
+        showToast(
           '회원탈퇴가 완료되었습니다.',
         )
 
@@ -148,13 +149,13 @@ function WithdrawPage() {
     }
 
 
-  const handleGoogleWithdraw = () => {
+  const handleGoogleWithdraw = async () => {
     if (!checkConfirmed()) {
       return
     }
 
     if (
-      window.confirm(
+      await confirmAction(
         'Google 계정을 다시 인증한 후 회원탈퇴를 진행합니다.',
       )
     ) {
@@ -163,13 +164,13 @@ function WithdrawPage() {
   }
 
 
-  const handleKakaoWithdraw = () => {
+  const handleKakaoWithdraw = async () => {
     if (!checkConfirmed()) {
       return
     }
 
     if (
-      window.confirm(
+      await confirmAction(
         'Kakao 계정을 다시 인증한 후 회원탈퇴를 진행합니다.',
       )
     ) {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import PageShell from '../components/PageShell'
+import { confirmAction } from '../components/Toast'
 import { Loading, Notice } from '../components/Ui'
 import { won } from '../utils/format'
 import {
@@ -80,6 +81,12 @@ function AccountPage() {
     }
   }
 
+  const handleReset = async () => {
+    if (await confirmAction('시뮬레이션 데이터를 초기화할까요?')) {
+      run(resetSimulation)
+    }
+  }
+
   if (!account || !settings) {
     return <PageShell eyebrow="내 계정" title="가상 자산 관리"><Notice type="error">{error}</Notice><Loading /></PageShell>
   }
@@ -135,7 +142,7 @@ function AccountPage() {
           <span className="card-label danger-label">초기화</span>
           <h2>시뮬레이션 초기화</h2>
           <p>가상 계좌와 시뮬레이션 설정을 초기 상태로 되돌립니다.</p>
-          <button className="outline-danger-button" disabled={busy} onClick={() => window.confirm('시뮬레이션 데이터를 초기화할까요?') && run(resetSimulation)}>전체 초기화</button>
+          <button className="outline-danger-button" disabled={busy} onClick={handleReset}>전체 초기화</button>
         </section>
       </div>
     </PageShell>

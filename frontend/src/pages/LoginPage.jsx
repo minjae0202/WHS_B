@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom'
 
 import Header from '../components/Header'
+import { showToast } from '../components/Toast'
 
 import {
   login,
@@ -94,7 +95,7 @@ function LoginPage() {
           'LOCAL',
         )
 
-        alert(
+        showToast(
           '로그인에 성공했습니다.',
         )
 

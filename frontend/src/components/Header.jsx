@@ -8,6 +8,7 @@ import {
 } from '../api/auth'
 
 import useAuth from '../hooks/useAuth'
+import { showToast } from './Toast'
 
 import {
   removeTokens,
@@ -35,7 +36,7 @@ function Header() {
 
       removeTokens()
 
-      alert(
+      showToast(
         '로그아웃되었습니다.',
       )
 
