@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom'
 
 import Header from '../components/Header'
+import { showToast } from '../components/Toast'
 
 import {
   socialSignup,
@@ -119,7 +120,7 @@ function SocialSignupPage() {
         )
 
 
-        alert(
+        showToast(
           '소셜 회원가입이 완료되었습니다.',
         )
 

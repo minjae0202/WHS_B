@@ -1,3 +1,5 @@
+import { showToast } from '../components/Toast'
+
 const OAUTH_STATE_KEY = 'oauth_state'
 const OAUTH_ACTION_KEY = 'oauth_action'
 
@@ -72,8 +74,9 @@ function startGoogleOAuth(
     import.meta.env.VITE_GOOGLE_CLIENT_ID
 
   if (!clientId) {
-    alert(
+    showToast(
       'Google Client ID가 설정되지 않았습니다.',
+      'error',
     )
     return
   }
@@ -109,8 +112,9 @@ function startKakaoOAuth(
     import.meta.env.VITE_KAKAO_REST_API_KEY
 
   if (!restApiKey) {
-    alert(
+    showToast(
       'Kakao REST API Key가 설정되지 않았습니다.',
+      'error',
     )
     return
   }

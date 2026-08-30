@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageShell from '../components/PageShell'
+import { confirmAction } from '../components/Toast'
 import { Empty, Loading, Notice, StatusBadge } from '../components/Ui'
 import { rate, shortDate, won } from '../utils/format'
 import {
@@ -90,7 +91,7 @@ function MyProductsPage() {
   }
 
   const terminate = async () => {
-    if (!window.confirm('중도해지하면 계약을 되돌릴 수 없습니다. 계속할까요?')) return
+    if (!await confirmAction('중도해지하면 계약을 되돌릴 수 없습니다. 계속할까요?')) return
     setError(''); setMessage('')
     try {
       const result = tab === 'DEPOSIT'

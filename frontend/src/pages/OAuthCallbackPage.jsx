@@ -9,6 +9,8 @@ import {
   useNavigate,
 } from 'react-router-dom'
 
+import { showToast } from '../components/Toast'
+
 import {
   socialLogin,
 } from '../api/auth'
@@ -139,7 +141,7 @@ function OAuthCallbackPage({
             clearOAuthAction()
             removeTokens()
 
-            alert(
+            showToast(
               '회원탈퇴가 완료되었습니다.',
             )
 
@@ -224,7 +226,7 @@ function OAuthCallbackPage({
 
             clearOAuthAction()
 
-            alert(
+            showToast(
               '로그인에 성공했습니다.',
             )
 
