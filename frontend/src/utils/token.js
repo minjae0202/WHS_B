@@ -1,5 +1,3 @@
-const ACCESS_TOKEN_KEY = 'access_token'
-const REFRESH_TOKEN_KEY = 'refresh_token'
 const AUTH_PROVIDER_KEY = 'auth_provider'
 
 const AUTH_CHANGE_EVENT = 'auth-change'
@@ -12,51 +10,15 @@ function notifyAuthChange() {
 }
 
 
-export function saveTokens(
-  accessToken,
-  refreshToken,
+export function saveAuthSession(
   provider = 'LOCAL',
 ) {
-  localStorage.setItem(
-    ACCESS_TOKEN_KEY,
-    accessToken,
-  )
-
-  localStorage.setItem(
-    REFRESH_TOKEN_KEY,
-    refreshToken,
-  )
-
   localStorage.setItem(
     AUTH_PROVIDER_KEY,
     provider,
   )
 
   notifyAuthChange()
-}
-
-
-export function saveAccessToken(
-  accessToken,
-) {
-  localStorage.setItem(
-    ACCESS_TOKEN_KEY,
-    accessToken,
-  )
-}
-
-
-export function getAccessToken() {
-  return localStorage.getItem(
-    ACCESS_TOKEN_KEY,
-  )
-}
-
-
-export function getRefreshToken() {
-  return localStorage.getItem(
-    REFRESH_TOKEN_KEY,
-  )
 }
 
 
@@ -69,14 +31,6 @@ export function getAuthProvider() {
 
 export function removeTokens() {
   localStorage.removeItem(
-    ACCESS_TOKEN_KEY,
-  )
-
-  localStorage.removeItem(
-    REFRESH_TOKEN_KEY,
-  )
-
-  localStorage.removeItem(
     AUTH_PROVIDER_KEY,
   )
 
@@ -86,7 +40,7 @@ export function removeTokens() {
 
 export function isLoggedIn() {
   return Boolean(
-    getAccessToken(),
+    getAuthProvider(),
   )
 }
 

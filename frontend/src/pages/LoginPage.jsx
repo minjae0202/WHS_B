@@ -16,7 +16,7 @@ import {
 
 import {
   isLoggedIn,
-  saveTokens,
+  saveAuthSession,
 } from '../utils/token'
 
 import {
@@ -82,15 +82,12 @@ function LoginPage() {
         setLoading(true)
         setErrorMessage('')
 
-        const response =
-          await login(
-            username,
-            password,
-          )
+        await login(
+          username,
+          password,
+        )
 
-        saveTokens(
-          response.data.access_token,
-          response.data.refresh_token,
+        saveAuthSession(
           'LOCAL',
         )
 
