@@ -3,6 +3,9 @@ from flask_jwt_extended import (
     get_jwt,
     get_jwt_identity,
     jwt_required,
+    set_access_cookies,
+    set_refresh_cookies,
+    unset_jwt_cookies,
 )
 
 from app.constants import SocialProvider
@@ -20,6 +23,21 @@ auth_bp = Blueprint(
     __name__,
     url_prefix="/api/auth",
 )
+
+
+def _token_response(result, message, status_code=200):
+    access_token = result.pop("access_token", None)
+    refresh_token = result.pop("refresh_token", None)
+    response = jsonify({
+        "success": True,
+        "data": result,
+        "message": message,
+    })
+    if access_token:
+        set_access_cookies(response, access_token)
+    if refresh_token:
+        set_refresh_cookies(response, refresh_token)
+    return response, status_code
 
 
 @auth_bp.post("/signup")
@@ -52,11 +70,7 @@ def login():
         password=payload["password"],
     )
 
-    return jsonify({
-        "success": True,
-        "data": result,
-        "message": "로그인에 성공했습니다.",
-    }), 200
+    return _token_response(result, "로그인에 성공했습니다.")
 
 
 @auth_bp.post("/refresh")
@@ -75,11 +89,14 @@ def refresh():
         ),
     )
 
-    return jsonify({
+    access_token = result.pop("access_token")
+    response = jsonify({
         "success": True,
         "data": result,
         "message": "토큰 재발급에 성공했습니다.",
-    }), 200
+    })
+    set_access_cookies(response, access_token)
+    return response, 200
 
 
 @auth_bp.post("/logout")
@@ -93,11 +110,13 @@ def logout():
         user_id=user_id
     )
 
-    return jsonify({
+    response = jsonify({
         "success": True,
         "data": {},
         "message": "로그아웃에 성공했습니다.",
-    }), 200
+    })
+    unset_jwt_cookies(response)
+    return response, 200
 
 
 @auth_bp.post("/google")
@@ -120,11 +139,7 @@ def google_login():
             "Google 로그인에 성공했습니다."
         )
 
-    return jsonify({
-        "success": True,
-        "data": result,
-        "message": message,
-    }), 200
+    return _token_response(result, message)
 
 
 @auth_bp.post("/kakao")
@@ -147,11 +162,7 @@ def kakao_login():
             "Kakao 로그인에 성공했습니다."
         )
 
-    return jsonify({
-        "success": True,
-        "data": result,
-        "message": message,
-    }), 200
+    return _token_response(result, message)
 
 
 @auth_bp.post("/social/signup")
@@ -167,8 +178,8 @@ def social_signup():
         username=payload["username"],
     )
 
-    return jsonify({
-        "success": True,
-        "data": result,
-        "message": "소셜 회원가입에 성공했습니다.",
-    }), 201
+    return _token_response(
+        result,
+        "소셜 회원가입에 성공했습니다.",
+        201,
+    )

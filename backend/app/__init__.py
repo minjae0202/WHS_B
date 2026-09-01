@@ -32,6 +32,16 @@ def create_app():
     )
 
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
+    app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
+    app.config["JWT_COOKIE_SECURE"] = (
+        os.environ.get("JWT_COOKIE_SECURE", "false").lower() == "true"
+    )
+    app.config["JWT_COOKIE_SAMESITE"] = "Lax"
+    app.config["JWT_COOKIE_CSRF_PROTECT"] = True
+    app.config["JWT_ACCESS_COOKIE_PATH"] = "/"
+    app.config["JWT_REFRESH_COOKIE_PATH"] = "/api/auth"
+    app.config["JWT_ACCESS_CSRF_COOKIE_PATH"] = "/"
+    app.config["JWT_REFRESH_CSRF_COOKIE_PATH"] = "/"
 
     app.config["GOOGLE_CLIENT_ID"] = os.environ.get(
         "GOOGLE_CLIENT_ID"

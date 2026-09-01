@@ -21,7 +21,7 @@ import {
 
 import {
   removeTokens,
-  saveTokens,
+  saveAuthSession,
 } from '../utils/token'
 
 import {
@@ -214,13 +214,8 @@ function OAuthCallbackPage({
           }
 
 
-          if (
-            data.access_token &&
-            data.refresh_token
-          ) {
-            saveTokens(
-              data.access_token,
-              data.refresh_token,
+          if (!data.signup_required) {
+            saveAuthSession(
               backendProvider,
             )
 

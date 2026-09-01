@@ -14,7 +14,7 @@ import {
 } from '../api/auth'
 
 import {
-  saveTokens,
+  saveAuthSession,
 } from '../utils/token'
 
 
@@ -94,15 +94,12 @@ function SocialSignupPage() {
         setLoading(true)
         setErrorMessage('')
 
-        const response =
-          await socialSignup(
-            socialSignupToken,
-            username,
-          )
+        await socialSignup(
+          socialSignupToken,
+          username,
+        )
 
-        saveTokens(
-          response.data.access_token,
-          response.data.refresh_token,
+        saveAuthSession(
           socialProvider,
         )
 
